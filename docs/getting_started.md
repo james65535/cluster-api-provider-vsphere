@@ -312,3 +312,52 @@ Now that you have the `kubeconfig` for your Workload Cluster, you can start depl
 **NOTE**: workload clusters do not have any addons applied aside from those added by kubeadm. Nodes in your workload clusters
 will be in the `NotReady` state until you apply a CNI addon. The `addons.yaml` file generated from `make prod-yaml` has a default calico
 addon which you can use, otherwise apply custom addons based on your use-case.
+
+## Creating Workload Clusters with custom kubeadm configurations
+
+When provisioning new workload clusters, users may wish to customize aspects of their cluster with kubeadm configuration options other than those created by the default configuration.
+The `cluster.spec.providerSpec.value.clusterConfiguration` field allows for the inclusion of kubeadm configuration parameters via yaml.
+An example of the previous cluster configuration yaml file is shown below which includes the kubeadm configuration options.
+Please note, some kubeadm configuration fields are overridden by the provider and cannot be defined, for example the kubeadm networking fields.
+
+```yaml
+---
+apiVersion: "cluster.k8s.io/v1alpha1"
+kind: Cluster
+metadata:
+  name: prod-workload
+spec:
+    clusterNetwork:
+        services:
+            cidrBlocks: ["100.64.0.0/13"]
+        pods:
+            cidrBlocks: ["100.96.0.0/11"]
+        serviceDomain: "cluster.local"
+    providerSpec:
+      value:
+        apiVersion: "vsphereproviderconfig/v1alpha1"
+        kind: "VsphereClusterProviderConfig"
+        vsphereUser: "<REDACTED>"
+        vspherePassword: "<REDACTED>"
+        vsphereServer: "<REDACTED>"
+        vsphereCredentialSecret: ""
+        clusterConfiguration:
+          apiServer:
+            certSANs: 
+            extraArgs:
+            authorization-mode: Node,RBAC
+            timeoutForControlPlane: 4m0s
+          certificatesDir: /etc/kubernetes/pki
+          clusterName: # Overridden by cluster.spec.clusterName
+          controlPlaneEndpoint: # Overridden by IPv4 Lookup and bindPort
+          controllerManager: {}
+          dns:
+            type: CoreDNS
+          etcd:
+            local:
+              dataDir: /var/lib/etcd
+          imageRepository: k8s.gcr.io
+          kubernetesVersion: # Overridden by machine.spec.versions.controlPlane
+          networking: # Overridden by cluster.spec.clusterNetwork
+          scheduler: {}
+```
