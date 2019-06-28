@@ -203,7 +203,7 @@ func generateUserData(ctx *context.MachineContext, bootstrapToken string) ([]byt
 			kubeadm.SetInitConfigurationOptions(
 				&ctx.MachineConfig.KubeadmConfiguration.Init,
 				kubeadm.WithNodeRegistrationOptions(
-					kubeadm.NewNodeRegistration(
+					kubeadm.SetNodeRegistration(&ctx.MachineConfig.KubeadmConfiguration.Init.NodeRegistration,
 						kubeadm.WithTaints(ctx.Machine.Spec.Taints),
 						kubeadm.WithNodeRegistrationName(hostnameLookup),
 						kubeadm.WithCRISocket(containerdSocket),

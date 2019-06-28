@@ -27,12 +27,11 @@ import (
 type NodeRegistrationOption func(*kubeadmv1beta1.NodeRegistrationOptions)
 
 // NewNodeRegistration will create a kubeadmNodeRegistrationOptions with some defaults and the ability to provide customizations.
-func NewNodeRegistration(opts ...NodeRegistrationOption) kubeadmv1beta1.NodeRegistrationOptions {
-	nro := &kubeadmv1beta1.NodeRegistrationOptions{}
+func SetNodeRegistration(base *kubeadmv1beta1.NodeRegistrationOptions, opts ...NodeRegistrationOption) kubeadmv1beta1.NodeRegistrationOptions {
 	for _, opt := range opts {
-		opt(nro)
+		opt(base)
 	}
-	return *nro
+	return *base
 }
 
 // WithTaints will set the taints on the NodeRegistration.
